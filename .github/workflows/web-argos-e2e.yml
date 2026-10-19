@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: [1, 2, 3, 4, 5]
+        containers: [1, 2, 3]
 
     steps:
       - uses: actions/checkout@v7.0.1
@@ -47,7 +47,7 @@ jobs:
           ALL_SPECS=($(ls apps/web/cypress/e2e/visual/*.cy.js | sort))
           TOTAL=${#ALL_SPECS[@]}
           SHARD_INDEX=$(( ${{ matrix.containers }} - 1 ))
-          SHARD_TOTAL=5
+          SHARD_TOTAL=3
 
           SHARD_SPECS=()
           for i in "${!ALL_SPECS[@]}"; do
