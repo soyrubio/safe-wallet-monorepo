@@ -58,3 +58,4 @@ export const getSpaceContactsTooltip = (spaceName: string): string =>
 export const FALLBACK_SPACE_NAME = 'your Workspace'
 
 export const IDENTICON_SIZE = 24
+export const getAllowlistAccountLabel = (name: string, chainName: string): string => `${name} on ${chainName}`
