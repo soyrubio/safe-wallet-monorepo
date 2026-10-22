@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import type { TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
 
-type HeldTokenAddresses = {
+export type HeldTokenAddresses = {
   addresses: string[]
   /** Every group, so a token added from the popular list still resolves its symbol and icon. */
   options: TokenOption[]

@@ -27,7 +27,7 @@ import {
   TOKENS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
-import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokenDraftRow from './TokenDraftRow'
 
 const SKELETON_CHIP_COUNT = 4
@@ -35,6 +35,7 @@ const SKELETON_CHIP_COUNT = 4
 type TokensSectionProps = {
   values: RecipientAllowlistFormValues
   onChange: (next: RecipientAllowlistFormValues) => void
+  heldTokens: HeldTokenAddresses
   hasAccount: boolean
   isCalloutDismissed: boolean
   onDismissCallout: () => void
@@ -43,11 +44,12 @@ type TokensSectionProps = {
 const TokensSection = ({
   values,
   onChange,
+  heldTokens,
   hasAccount,
   isCalloutDismissed,
   onDismissCallout,
 }: TokensSectionProps): ReactElement => {
-  const { addresses, options, isLoading, isError, refetch } = useHeldTokenAddresses()
+  const { addresses, options, isLoading, isError, refetch } = heldTokens
   const [isAdding, setIsAdding] = useState(false)
 
   const tokens = useMemo(() => getFormTokenAddresses(addresses, values), [addresses, values])

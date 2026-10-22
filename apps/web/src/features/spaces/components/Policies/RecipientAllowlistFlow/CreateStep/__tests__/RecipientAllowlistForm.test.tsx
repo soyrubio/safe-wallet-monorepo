@@ -9,10 +9,9 @@ import {
   createDefaultAllowlistValues,
   type RecipientAllowlistFormValues,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
-import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
+import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import RecipientAllowlistForm from '../RecipientAllowlistForm'
 
-jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../TokensSection', () => ({
   __esModule: true,
   default: ({
@@ -53,12 +52,17 @@ jest.mock('../RecipientsSection', () => ({
   ),
 }))
 
-const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
-
 const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
 const SAFE = checksumAddress(faker.finance.ethereumAddress())
 const UNKNOWN_TOKEN = checksumAddress(faker.finance.ethereumAddress())
 const ACCOUNT = { chainId: '1', address: SAFE, label: 'Treasury' }
+const HELD_TOKENS: HeldTokenAddresses = {
+  addresses: [ZERO_ADDRESS, UNKNOWN_TOKEN],
+  options: [{ address: ZERO_ADDRESS, symbol: 'ETH', name: 'Ether', decimals: 18, group: 'held' }],
+  isLoading: false,
+  isError: false,
+  refetch: jest.fn(),
+}
 
 const Harness = ({
   initial = createDefaultAllowlistValues(),
@@ -78,6 +82,7 @@ const Harness = ({
     <RecipientAllowlistForm
       values={values}
       onChange={setValues}
+      heldTokens={HELD_TOKENS}
       account={hasAccount ? ACCOUNT : undefined}
       showSections={showSections}
       dismissedCallouts={{ tokens: true, recipients: false }}
@@ -89,16 +94,6 @@ const Harness = ({
 }
 
 describe('RecipientAllowlistForm', () => {
-  beforeEach(() => {
-    mockHeld.mockReturnValue({
-      addresses: [ZERO_ADDRESS, UNKNOWN_TOKEN],
-      options: [{ address: ZERO_ADDRESS, symbol: 'ETH', name: 'Ether', decimals: 18, group: 'held' }],
-      isLoading: false,
-      isError: false,
-      refetch: jest.fn(),
-    })
-  })
-
   it('asks for a selection until a recipient is picked, then names tokens and recipient', async () => {
     render(<Harness />)
 
