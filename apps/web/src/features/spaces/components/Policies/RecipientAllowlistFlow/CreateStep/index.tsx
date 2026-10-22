@@ -1,11 +1,12 @@
 import { useContext, useState, type ReactElement } from 'react'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeAccountSelector from '../../SafeAccountSelector'
-import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { chainLabel, findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
@@ -34,8 +35,9 @@ import {
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 
-/** The guard states an allowlist can be set up on; the form explains them itself, so they get no banner. */
+/** The guard states an allowlist can be set up on. */
 const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
+/** The ready states the form explains itself, so they get no banner. */
 const SILENT_GUARD_STATES: GuardStatus['status'][] = ['none', 'known']
 
 export type CreateRecipientAllowlistPolicyProps = {
@@ -65,6 +67,8 @@ const CreateRecipientAllowlistPolicy = ({
 
   const heldTokens = useHeldTokenAddresses()
 
+  useSafeShieldForAddressPoisoning(values.recipients.map((recipient) => recipient.address))
+
   // Reset during render, not in an effect, so the remounted recipients section never sees the old Safe's values.
   const [trackedScopeKey, setTrackedScopeKey] = useState(scopeKey)
   if (trackedScopeKey !== scopeKey) {
@@ -77,6 +81,7 @@ const CreateRecipientAllowlistPolicy = ({
     canContinue && !heldTokens.isLoading && !heldTokens.isError && isAllowlistComplete(heldTokens.addresses, values)
 
   const isSettled = !isLoading && !isError
+  const safeName = selectedSafe && (selectedSafe.name || shortenAddress(selectedSafe.address))
 
   return (
     <TxCard>
@@ -86,14 +91,11 @@ const CreateRecipientAllowlistPolicy = ({
           onChange={setValues}
           heldTokens={heldTokens}
           account={
-            selectedSafe && target
+            selectedSafe && safeName && target
               ? {
                   chainId: selectedSafe.chainId,
                   address: selectedSafe.address,
-                  label: getAllowlistAccountLabel(
-                    selectedSafe.name || shortenAddress(selectedSafe.address),
-                    selectedSafe.chain?.chainName ?? selectedSafe.chainId,
-                  ),
+                  label: getAllowlistAccountLabel(safeName, chainLabel(selectedSafe)),
                 }
               : undefined
           }
@@ -128,12 +130,8 @@ const CreateRecipientAllowlistPolicy = ({
             />
           )}
 
-          {selectedSafe && guard && !SILENT_GUARD_STATES.includes(guard.status) && (
-            <GuardStatusBanner
-              guard={guard}
-              safeName={selectedSafe.name || shortenAddress(selectedSafe.address)}
-              onRetry={retry}
-            />
+          {safeName && guard && !SILENT_GUARD_STATES.includes(guard.status) && (
+            <GuardStatusBanner guard={guard} safeName={safeName} onRetry={retry} />
           )}
         </RecipientAllowlistForm>
 
