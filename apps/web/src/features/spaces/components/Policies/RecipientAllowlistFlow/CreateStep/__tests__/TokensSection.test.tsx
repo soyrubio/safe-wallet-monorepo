@@ -196,12 +196,20 @@ describe('TokensSection', () => {
     expect(screen.queryByText('Tokens in this account will show here.')).not.toBeInTheDocument()
   })
 
-  it('keeps loaded chips visible when a refetch fails', () => {
-    hold([ETH, USDC_OPTION], { isError: true })
+  it('keeps loaded chips visible when a refetch fails and offers a retry below them', async () => {
+    const refetch = jest.fn()
+    hold([ETH, USDC_OPTION], { isError: true, refetch })
     setup()
 
     expect(screen.queryByTestId('allowlist-tokens-error')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Allow ETH' })).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-tokens-refetch-error')).toHaveTextContent(
+      'Could not load the tokens in this account.',
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(refetch).toHaveBeenCalled()
   })
 
   it.each([

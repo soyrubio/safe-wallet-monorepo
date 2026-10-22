@@ -12,6 +12,7 @@ import {
 import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
 import { TokenGroupError } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
+import LoadError from '@safe-global/views/features/spaces/components/Policies/components/LoadError'
 import { getFormTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/utils/allowlistForm'
 import type { RecipientAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/types'
 import {
@@ -147,6 +148,10 @@ const TokensSection = ({
       )}
 
       {renderBody()}
+
+      {hasAccount && isError && addresses.length > 0 && (
+        <LoadError message={TOKENS_LOAD_ERROR_TEXT} onRetry={refetch} data-testid="allowlist-tokens-refetch-error" />
+      )}
 
       {isAdding && <TokenDraftRow options={addable} onConfirm={add} onCancel={() => setIsAdding(false)} />}
 
